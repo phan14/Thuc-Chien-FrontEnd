@@ -8,10 +8,12 @@ dayjs.locale("vi");
 const elMainMenu = document.getElementById("mainMenu");
 const elArticles = document.getElementById("articles");
 const elCategoryTitle = document.getElementById("categoryTitle");
+const elBtnLoadMore = document.getElementById("btnLoadMore");
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const id = parseInt(urlParams.get("id"));
+let currentPage = 1;
 
 //////////////////////////////////////
 
@@ -39,24 +41,34 @@ API.get("categories_news").then((response) => {
         </ul>
       </li>`;
 });
-// ////////////////////////////
-// Categories_BAi VIet
-API.get(`categories_news/${id}/articles?limit=5&page=1`).then((res) => {
-  const articles = res.data.data;
-  let categroyName = "";
+//  Nút thực hiện onclick
+getAricles(currentPage);
 
-  let html = "";
-  articles.forEach((item) => {
-    const title = item.title;
-    const thumb = item.thumb;
-    const publishDate = dayjs(item.publish_date).fromNow();
-    const description = item.description;
-    const authorName = item.author;
-    categroyName = item.category.name;
+elBtnLoadMore.addEventListener("click", function () {
+  currentPage++;
+  elBtnLoadMore.innerText = " Đang tải thêm....";
+  elBtnLoadMore.disabled = true;
+  getAricles(currentPage);
+});
 
-    html +=
-      /*html */
-      `
+// Hàm để tạo HTML cho danh sách bài viết
+function getAricles(page = 1) {
+  API.get(`categories_news/${id}/articles?limit=5&page=${page}`).then((res) => {
+    const articles = res.data.data;
+    let categroyName = "";
+
+    let html = "";
+    articles.forEach((item) => {
+      const title = item.title;
+      const thumb = item.thumb;
+      const publishDate = dayjs(item.publish_date).fromNow();
+      const description = item.description;
+      const authorName = item.author;
+      categroyName = item.category.name;
+
+      html +=
+        /*html */
+        `
     <div class="d-md-flex post-entry-2 half">
      <a href="single-post.html" class="me-4 thumbnail">
        <img src="${thumb}" alt="${title}" class="img-fluid">
@@ -74,8 +86,11 @@ API.get(`categories_news/${id}/articles?limit=5&page=1`).then((res) => {
      </div>
    </div>
     `;
-  });
+    });
 
-  elCategoryTitle.innerText = `Category: ${categroyName}`;
-  elArticles.innerHTML = html;
-});
+    elCategoryTitle.innerText = `Category: ${categroyName}`;
+    elArticles.innerHTML += html;
+    elBtnLoadMore.innerText = " Xem thêm";
+    elBtnLoadMore.disabled = false;
+  });
+}
