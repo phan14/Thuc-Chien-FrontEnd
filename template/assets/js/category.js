@@ -6,6 +6,15 @@ dayjs.extend(window.dayjs_plugin_relativeTime);
 dayjs.locale("vi");
 
 const elMainMenu = document.getElementById("mainMenu");
+const elArticles = document.getElementById("articles");
+const elCategoryTitle = document.getElementById("categoryTitle");
+
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const id = parseInt(urlParams.get("id"));
+
+//////////////////////////////////////
+
 API.get("categories_news").then((response) => {
   const data = response.data;
   const categories = data.data;
@@ -30,9 +39,43 @@ API.get("categories_news").then((response) => {
         </ul>
       </li>`;
 });
-
+// ////////////////////////////
 // Categories_BAi VIet
-API.get("categories_news/2/articles?limit=5&page=1").then((res) => {
-  const articles = res.data;
-  console.log(articles);
+API.get(`categories_news/${id}/articles?limit=5&page=1`).then((res) => {
+  const articles = res.data.data;
+  let categroyName = "";
+
+  let html = "";
+  articles.forEach((item) => {
+    const title = item.title;
+    const thumb = item.thumb;
+    const publishDate = dayjs(item.publish_date).fromNow();
+    const description = item.description;
+    const authorName = item.author;
+    categroyName = item.category.name;
+
+    html +=
+      /*html */
+      `
+    <div class="d-md-flex post-entry-2 half">
+     <a href="single-post.html" class="me-4 thumbnail">
+       <img src="${thumb}" alt="${title}" class="img-fluid">
+     </a>
+     <div>
+     <div className="post-name"> <span>${publishDate}</span></div>
+       <h3><a href="single-post.html">${title}</a></h3>
+       <p>${description}</p>
+       <div class="d-flex align-items-center author">
+         <div class="photo"><img src="assets/img/person-2.jpg" alt="" class="img-fluid"></div>
+         <div class="name">
+           <h3 class="m-0 p-0">${authorName}</h3>
+         </div>
+       </div>
+     </div>
+   </div>
+    `;
+  });
+
+  elCategoryTitle.innerText = `Category: ${categroyName}`;
+  elArticles.innerHTML = html;
 });
