@@ -9,6 +9,7 @@ const elMainMenu = document.getElementById("mainMenu");
 const elArticles = document.getElementById("articles");
 const elCategoryTitle = document.getElementById("categoryTitle");
 const elBtnLoadMore = document.getElementById("btnLoadMore");
+const elMyPagination = document.getElementById("myPagination");
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
@@ -44,18 +45,20 @@ API.get("categories_news").then((response) => {
 //  Nút thực hiện onclick
 getAricles(currentPage);
 
-elBtnLoadMore.addEventListener("click", function () {
-  currentPage++;
-  elBtnLoadMore.innerText = " Đang tải thêm....";
-  elBtnLoadMore.disabled = true;
-  getAricles(currentPage);
-});
+// elBtnLoadMore.addEventListener("click", function () {
+//   currentPage++;
+//   elBtnLoadMore.innerText = " Đang tải thêm....";
+//   elBtnLoadMore.disabled = true;
+//   getAricles(currentPage);
+// });
 
 // Hàm để tạo HTML cho danh sách bài viết
 function getAricles(page = 1) {
   API.get(`categories_news/${id}/articles?limit=5&page=${page}`).then((res) => {
     const articles = res.data.data;
     let categroyName = "";
+
+    const totalPage = res.data.meta.last_page;
 
     let html = "";
     articles.forEach((item) => {
@@ -90,7 +93,17 @@ function getAricles(page = 1) {
 
     elCategoryTitle.innerText = `Category: ${categroyName}`;
     elArticles.innerHTML += html;
-    elBtnLoadMore.innerText = " Xem thêm";
-    elBtnLoadMore.disabled = false;
+    renderPagination(totalPage);
+    // elBtnLoadMore.innerText = " Xem thêm";
+    // elBtnLoadMore.disabled = false;
   });
+}
+//  Tạo mục lục
+function renderPagination(total) {
+  let html = ` <a href="#" class="prev">Prevous</a>`;
+  for (let index = 1; index <= total; index++) {
+    html += `<a href="#">${index}</a>`;
+  }
+  html += `<a href="#" class="next">Next</a>`;
+  elMyPagination.innerHTML = html;
 }
